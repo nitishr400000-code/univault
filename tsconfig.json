@@ -1,0 +1,3 @@
+{
+  "extends": "@univault/config/tsconfig.base.json"
+}

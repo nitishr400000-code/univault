@@ -1,0 +1,22 @@
+{
+  "name": "@univault/api",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@trpc/client": "^11.19.0",
+    "@trpc/server": "^11.19.0",
+    "@univault/auth": "*",
+    "@univault/db": "*",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@univault/config": "*",
+    "typescript": "^6.0.3"
+  }
+}

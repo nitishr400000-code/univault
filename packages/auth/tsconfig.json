@@ -1,0 +1,6 @@
+{
+  "extends": "@univault/config/tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true
+  }
+}
