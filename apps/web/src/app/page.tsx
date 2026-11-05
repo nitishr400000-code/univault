@@ -19,9 +19,16 @@ const TITLE_TEXT = `
     ╚═╝       ╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
  `;
 
-export default function Home() {
+const Home = () => {
   const trpc = useTRPC();
   const healthCheck = useQuery(trpc.healthCheck.queryOptions());
+
+  const getStatusLabel = () => {
+    if (healthCheck.isLoading) {
+      return "Checking...";
+    }
+    return healthCheck.data ? "Connected" : "Disconnected";
+  };
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-2">
@@ -33,16 +40,14 @@ export default function Home() {
             <div
               className={`h-2 w-2 rounded-full ${healthCheck.data ? "bg-green-500" : "bg-red-500"}`}
             />
-            <span className="text-sm text-muted-foreground">
-              {healthCheck.isLoading
-                ? "Checking..."
-                : healthCheck.data
-                  ? "Connected"
-                  : "Disconnected"}
+            <span className="text-muted-foreground text-sm">
+              {getStatusLabel()}
             </span>
           </div>
         </section>
       </div>
     </div>
   );
-}
+};
+
+export default Home;

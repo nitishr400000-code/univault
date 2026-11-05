@@ -29,10 +29,8 @@ pre-commit:
         - "*.yml"
         - "*.graphql"
         - "*.gql"
-      stage_fixed: true
-    - name: oxlint
-      run: npm oxlint --fix {staged_files}
-      stage_fixed: true
-    - name: oxfmt
-      run: npm oxfmt --write {staged_files}
+      exclude:
+        - ".agents/skills/**"
+        - ".claude/skills/**"
+        - "packages/ui/src/components/**"
       stage_fixed: true

@@ -5,5 +5,10 @@ import react from "ultracite/oxlint/react";
 
 export default defineConfig({
   extends: [core, react, next],
-  ignorePatterns: core.ignorePatterns,
+  ignorePatterns: [
+    ...(core.ignorePatterns || []),
+    ".agents/skills/**",
+    ".claude/skills/**",
+    "packages/ui/src/components/**",
+  ],
 });
