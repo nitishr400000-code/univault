@@ -29,4 +29,8 @@ pre-commit:
         - "*.yml"
         - "*.graphql"
         - "*.gql"
+      exclude:
+        - ".agents/skills/**"
+        - ".claude/skills/**"
+        - "packages/ui/src/components/**"
       stage_fixed: true
