@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 
 import { authClient } from "@/lib/auth-client";
 
-export default function UserMenu() {
+const UserMenu = () => {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
 
@@ -58,4 +58,6 @@ export default function UserMenu() {
       </DropdownMenuContent>
     </DropdownMenu>
   );
-}
+};
+
+export default UserMenu;

@@ -30,9 +30,3 @@ pre-commit:
         - "*.graphql"
         - "*.gql"
       stage_fixed: true
-    - name: oxlint
-      run: npm oxlint --fix {staged_files}
-      stage_fixed: true
-    - name: oxfmt
-      run: npm oxfmt --write {staged_files}
-      stage_fixed: true
