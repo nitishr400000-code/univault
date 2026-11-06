@@ -1,7 +1,7 @@
 import type { Context as ApiContext } from "@univault/api/context";
 import type { Context as HonoContext } from "hono";
 
-import { db, auth } from "./services";
+import { auth, db, photoStorage } from "./services";
 
 export interface CreateContextOptions {
   context: HonoContext;
@@ -15,6 +15,7 @@ export const createContext = async ({
   });
   return {
     db,
+    photoStorage,
     session,
   };
 };

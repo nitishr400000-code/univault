@@ -14,7 +14,11 @@ const DashboardPage = async () => {
         <h2 className="font-medium">Profile</h2>
         <ProfileNameForm name={session.user.name} />
       </section>
-      <Dashboard />
+      <Dashboard
+        canPost={
+          session.user.role === "student" || session.user.role === "staff"
+        }
+      />
     </div>
   );
 };

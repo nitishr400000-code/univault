@@ -31,6 +31,7 @@ describe("verified-user procedure", () => {
   it("rejects an unverified signed-in user", async () => {
     const caller = verificationProbe.createCaller({
       db: {} as never,
+      photoStorage: {} as never,
       session: session(false),
     });
     await expect(caller.protectedAction()).rejects.toMatchObject({
@@ -42,6 +43,7 @@ describe("verified-user procedure", () => {
   it("allows a verified signed-in user", async () => {
     const caller = verificationProbe.createCaller({
       db: {} as never,
+      photoStorage: {} as never,
       session: session(true),
     });
     await expect(caller.protectedAction()).resolves.toBe("allowed");

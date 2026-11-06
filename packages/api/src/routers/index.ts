@@ -4,6 +4,7 @@ import {
   router,
   systemAdminProcedure,
 } from "../index";
+import { itemsRouter } from "./items";
 
 export const appRouter = router({
   admin: router({
@@ -12,6 +13,7 @@ export const appRouter = router({
     ),
   }),
   healthCheck: publicProcedure.query(() => "OK"),
+  items: itemsRouter,
   privateData: protectedProcedure.query(({ ctx }) => ({
     message: "This is private",
     user: ctx.session.user,

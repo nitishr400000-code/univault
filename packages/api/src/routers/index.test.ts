@@ -37,7 +37,11 @@ describe("admin user listing", () => {
   });
 
   it("rejects a signed-in student before reading users", async () => {
-    const caller = appRouter.createCaller({ db, session: session("student") });
+    const caller = appRouter.createCaller({
+      db,
+      photoStorage: {} as never,
+      session: session("student"),
+    });
     await expect(caller.admin.listUsers()).rejects.toMatchObject({
       code: "FORBIDDEN",
     });
@@ -46,6 +50,7 @@ describe("admin user listing", () => {
   it("allows a system admin to list users from PostgreSQL", async () => {
     const caller = appRouter.createCaller({
       db,
+      photoStorage: {} as never,
       session: session("system_admin"),
     });
     await expect(caller.admin.listUsers()).resolves.toEqual(expect.any(Array));

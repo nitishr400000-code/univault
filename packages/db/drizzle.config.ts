@@ -6,6 +6,6 @@ export default {
   },
   dialect: "postgresql",
   out: "./src/migrations",
-  schema: "./src/schema/auth.ts",
+  schema: "./src/schema/*.ts",
   schemaFilter: ["public"],
 };
