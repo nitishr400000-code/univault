@@ -32,6 +32,11 @@ const DashboardPage = async () => {
             </Button>
           </>
         )}
+        {session.user.emailVerified && session.user.role === "staff" && (
+          <Button render={<Link href="/staff/review" />} variant="outline">
+            Review claims
+          </Button>
+        )}
       </div>
       <section className="grid gap-4 p-4">
         <h2 className="font-medium">Profile</h2>

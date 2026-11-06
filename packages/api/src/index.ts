@@ -45,6 +45,16 @@ export const campusMemberProcedure = verifiedProcedure.use(({ ctx, next }) => {
   return next({ ctx });
 });
 
+export const staffProcedure = verifiedProcedure.use(({ ctx, next }) => {
+  if (ctx.session.user.role !== "staff") {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Staff access required",
+    });
+  }
+  return next({ ctx });
+});
+
 export const systemAdminProcedure = protectedProcedure.use(({ ctx, next }) => {
   if (ctx.session.user.role !== "system_admin") {
     throw new TRPCError({
