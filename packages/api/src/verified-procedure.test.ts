@@ -30,7 +30,9 @@ const session = (emailVerified: boolean) =>
 describe("verified-user procedure", () => {
   it("rejects an unverified signed-in user", async () => {
     const caller = verificationProbe.createCaller({
+      auth: {} as never,
       db: {} as never,
+      headers: new Headers(),
       photoStorage: {} as never,
       session: session(false),
     });
@@ -42,7 +44,9 @@ describe("verified-user procedure", () => {
 
   it("allows a verified signed-in user", async () => {
     const caller = verificationProbe.createCaller({
+      auth: {} as never,
       db: {} as never,
+      headers: new Headers(),
       photoStorage: {} as never,
       session: session(true),
     });

@@ -46,7 +46,9 @@ interface ItemCaller {
 
 const createCaller = (userSession: unknown = session()) =>
   appRouter.createCaller({
+    auth: {} as never,
     db: {} as never,
+    headers: new Headers(),
     photoStorage: { delete: vi.fn(), read: vi.fn(), save: vi.fn() } as never,
     session: userSession as never,
   }) as unknown as ItemCaller;

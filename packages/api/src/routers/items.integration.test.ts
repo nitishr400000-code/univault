@@ -79,7 +79,9 @@ describe("found item creation", () => {
 
   it("creates active posts with ordered JPEG, PNG, and WebP photos that signed-in users can read", async () => {
     const caller = appRouter.createCaller({
+      auth: {} as never,
       db,
+      headers: new Headers(),
       photoStorage: photoStorage(),
       session: session("student-1", "student"),
     });
@@ -121,7 +123,9 @@ describe("found item creation", () => {
     }
 
     const otherSignedInUser = appRouter.createCaller({
+      auth: {} as never,
       db,
+      headers: new Headers(),
       photoStorage: photoStorage(),
       session: session("staff-1", "staff"),
     });
@@ -134,7 +138,9 @@ describe("found item creation", () => {
     });
 
     const unverifiedUser = appRouter.createCaller({
+      auth: {} as never,
       db,
+      headers: new Headers(),
       photoStorage: photoStorage(),
       session: session("student-1", "student", false),
     });
