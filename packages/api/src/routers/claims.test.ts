@@ -30,6 +30,7 @@ const contextFor = (role = "student", emailVerified = true) => ({
 
 interface ClaimsCaller {
   claims: {
+    handover: (input: { itemId: string }) => Promise<unknown>;
     submit: (input: { itemId: string; proofNote: string }) => Promise<unknown>;
   };
 }
@@ -63,6 +64,19 @@ describe("claim submission validation", () => {
       callerFor("system_admin").claims.submit({
         itemId: "ea734021-f6b2-4eaa-bd74-9d7ac51822b7",
         proofNote: "A scratch mark on the back left corner",
+      })
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
+  });
+
+  it("refuses handover from non-staff users before accessing the database", async () => {
+    await expect(
+      callerFor("student").claims.handover({
+        itemId: "ea734021-f6b2-4eaa-bd74-9d7ac51822b7",
+      })
+    ).rejects.toMatchObject({ code: "FORBIDDEN" });
+    await expect(
+      callerFor("system_admin").claims.handover({
+        itemId: "ea734021-f6b2-4eaa-bd74-9d7ac51822b7",
       })
     ).rejects.toMatchObject({ code: "FORBIDDEN" });
   });
