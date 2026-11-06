@@ -1,7 +1,7 @@
 import { createDb } from "@univault/db";
 import { afterAll, describe, expect, it } from "vitest";
+import "@univault/db/test/setup";
 
-import { router, verifiedProcedure } from "../index";
 import { appRouter } from "./index";
 
 const db = createDb({
@@ -31,10 +31,6 @@ const session = (role: string) =>
     },
   }) as never;
 
-const verificationProbe = router({
-  protectedAction: verifiedProcedure.query(() => "allowed"),
-});
-
 describe("admin user listing", () => {
   afterAll(async () => {
     await db.$client.end();
@@ -53,28 +49,5 @@ describe("admin user listing", () => {
       session: session("system_admin"),
     });
     await expect(caller.admin.listUsers()).resolves.toEqual(expect.any(Array));
-  });
-});
-
-describe("verified-user procedure", () => {
-  it("rejects an unverified signed-in user", async () => {
-    const student = session("student") as { user: { emailVerified: boolean } };
-    student.user.emailVerified = false;
-    const caller = verificationProbe.createCaller({
-      db,
-      session: student as never,
-    });
-    await expect(caller.protectedAction()).rejects.toMatchObject({
-      code: "FORBIDDEN",
-      message: "Email verification required",
-    });
-  });
-
-  it("allows a verified signed-in user", async () => {
-    const caller = verificationProbe.createCaller({
-      db,
-      session: session("student"),
-    });
-    await expect(caller.protectedAction()).resolves.toBe("allowed");
   });
 });

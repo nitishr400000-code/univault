@@ -5,6 +5,5 @@ export default defineProject({
     fileParallelism: false,
     include: ["src/**/*.test.ts"],
     name: "@univault/api",
-    setupFiles: ["@univault/db/test/setup"],
   },
 });

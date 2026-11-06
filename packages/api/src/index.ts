@@ -24,6 +24,16 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
   });
 });
 
+export const verifiedProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (!ctx.session.user.emailVerified) {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "Email verification required",
+    });
+  }
+  return next({ ctx });
+});
+
 export const systemAdminProcedure = protectedProcedure.use(({ ctx, next }) => {
   if (ctx.session.user.role !== "system_admin") {
     throw new TRPCError({
