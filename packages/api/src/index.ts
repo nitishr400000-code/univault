@@ -23,3 +23,13 @@ export const protectedProcedure = t.procedure.use(({ ctx, next }) => {
     },
   });
 });
+
+export const systemAdminProcedure = protectedProcedure.use(({ ctx, next }) => {
+  if (ctx.session.user.role !== "system_admin") {
+    throw new TRPCError({
+      code: "FORBIDDEN",
+      message: "System administrator access required",
+    });
+  }
+  return next({ ctx });
+});

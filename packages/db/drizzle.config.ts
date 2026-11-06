@@ -1,7 +1,6 @@
-import { defineConfig } from "drizzle-kit";
 import "varlock/auto-load";
 
-export default defineConfig({
+export default {
   dbCredentials: {
     url: process.env.DATABASE_URL || "",
   },
@@ -9,4 +8,4 @@ export default defineConfig({
   out: "./src/migrations",
   schema: "./src/schema/auth.ts",
   schemaFilter: ["public"],
-});
+};

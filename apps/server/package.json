@@ -9,6 +9,7 @@
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.mjs",
     "env:generate": "varlock codegen",
+    "seed:admin": "tsx src/seed-admin.ts",
     "auth:generate": "varlock run -- npx --yes auth@latest generate --config src/services.ts --output ../../packages/db/src/schema/auth.ts --yes"
   },
   "dependencies": {

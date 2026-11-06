@@ -55,6 +55,12 @@ npm run db:push
 Remove-Item Env:DATABASE_URL
 ```
 
+## Campus authentication
+
+Set `CAMPUS_EMAIL_DOMAIN` in the server environment to the institution's email domain (for local setup, the sample is `college.edu`; omit the `@`). The default roles are `student`, `staff`, and `system_admin`, and new registrations receive the `student` role. Only `system_admin` can use administrative user operations.
+
+To create the first system administrator, set `SYSTEM_ADMIN_EMAIL`, `SYSTEM_ADMIN_NAME`, and `SYSTEM_ADMIN_PASSWORD`, then run `npm run seed:admin --workspace=server`. The seed can be run repeatedly; it keeps one configured admin account and does not duplicate credential records.
+
 Then run the workspace tests:
 
 ```bash
