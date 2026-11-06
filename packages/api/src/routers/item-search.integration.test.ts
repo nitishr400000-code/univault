@@ -13,8 +13,8 @@ const db = createDb({ DATABASE_URL: testDatabaseUrl });
 const posterEmail = "poster-private@college.edu";
 const posterId = "item-search-poster";
 const itemIds = {
-  description: crypto.randomUUID(),
   claimed: crypto.randomUUID(),
+  description: crypto.randomUUID(),
   keys: crypto.randomUUID(),
   pending: crypto.randomUUID(),
   place: crypto.randomUUID(),
@@ -26,7 +26,11 @@ const caller = () =>
     auth: {} as never,
     db,
     headers: new Headers(),
-    photoStorage: { delete: async () => {}, read: async () => null, save: async () => "" },
+    photoStorage: {
+      delete: () => Promise.resolve(),
+      read: () => Promise.resolve(null),
+      save: () => Promise.resolve(""),
+    },
     session: {
       session: {
         createdAt: new Date(),
@@ -148,7 +152,9 @@ describe("found item search and details", () => {
 
   it("filters by category and excludes claimed items when category is omitted", async () => {
     const all = await caller().items.search();
-    const electronics = await caller().items.search({ category: "Electronics" });
+    const electronics = await caller().items.search({
+      category: "Electronics",
+    });
 
     expect(all.map(({ id }) => id)).toEqual(
       expect.arrayContaining([
@@ -161,13 +167,10 @@ describe("found item search and details", () => {
     );
     expect(all.map(({ id }) => id)).not.toContain(itemIds.claimed);
     expect(electronics.map(({ id }) => id)).toEqual(
-      expect.arrayContaining([
-        itemIds.title,
-        itemIds.place,
-        itemIds.pending,
-      ])
+      expect.arrayContaining([itemIds.title, itemIds.place, itemIds.pending])
     );
     expect(electronics.map(({ id }) => id)).not.toContain(itemIds.description);
+    expect(electronics.map(({ id }) => id)).not.toContain(itemIds.keys);
     expect(electronics.map(({ id }) => id)).not.toContain(itemIds.claimed);
   });
 

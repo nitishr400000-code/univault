@@ -14,6 +14,9 @@ const DashboardPage = async () => {
       <h1>Dashboard</h1>
       <div className="flex items-center justify-between gap-4">
         <p>Welcome {session.user.name}</p>
+        <Button render={<Link href="/items" />} variant="outline">
+          Search found items
+        </Button>
         {session.user.role === "system_admin" && (
           <Button render={<Link href="/admin/users" />} variant="outline">
             Manage users

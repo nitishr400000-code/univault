@@ -3,7 +3,7 @@ import { randomUUID } from "node:crypto";
 
 import { TRPCError } from "@trpc/server";
 import { item, itemPhoto } from "@univault/db/schema/items";
-import { eq } from "drizzle-orm";
+import { and, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { z } from "zod";
 
 import { protectedProcedure, router, verifiedProcedure } from "../index";
@@ -20,6 +20,15 @@ const categories = [
   "Personal Gear",
   "Other",
 ] as const;
+
+const categorySchema = z.enum(categories);
+
+const searchInput = z
+  .object({
+    category: categorySchema.optional(),
+    keyword: z.string().trim().min(1).max(100).optional(),
+  })
+  .optional();
 
 const photoInput = z.object({
   contentType: z.enum(["image/jpeg", "image/png", "image/webp"]),
@@ -102,6 +111,36 @@ const decodePhoto = (input: z.infer<typeof photoInput>): StoredPhoto => {
 };
 
 export const itemsRouter = router({
+  byId: protectedProcedure
+    .input(z.object({ id: z.uuid() }))
+    .query(async ({ ctx, input }) => {
+      const [foundItem] = await ctx.db
+        .select({
+          category: item.category,
+          description: item.description,
+          foundAt: item.foundAt,
+          id: item.id,
+          placeFound: item.placeFound,
+          status: item.status,
+          title: item.title,
+        })
+        .from(item)
+        .where(eq(item.id, input.id))
+        .limit(1);
+
+      if (!foundItem) {
+        throw new TRPCError({ code: "NOT_FOUND", message: "Item not found" });
+      }
+
+      const photos = await ctx.db
+        .select({ id: itemPhoto.id, position: itemPhoto.position })
+        .from(itemPhoto)
+        .where(eq(itemPhoto.itemId, input.id))
+        .orderBy(itemPhoto.position);
+
+      return { ...foundItem, photos };
+    }),
+
   create: verifiedProcedure
     .input(createInput)
     .mutation(async ({ ctx, input }) => {
@@ -179,4 +218,38 @@ export const itemsRouter = router({
         dataBase64: Buffer.from(stored.bytes).toString("base64"),
       };
     }),
+
+  search: protectedProcedure.input(searchInput).query(({ ctx, input }) => {
+    const filters = [inArray(item.status, ["Active", "PendingClaim"] as const)];
+    if (input?.category) {
+      filters.push(eq(item.category, input.category));
+    }
+    const keyword = input?.keyword?.replaceAll(/[\\%_]/gu, "\\$&");
+    if (keyword) {
+      const pattern = `%${keyword}%`;
+      const matchKeyword = or(
+        ilike(item.title, pattern),
+        ilike(item.description, pattern),
+        ilike(item.placeFound, pattern)
+      );
+      if (matchKeyword) {
+        filters.push(matchKeyword);
+      }
+    }
+
+    return ctx.db
+      .select({
+        category: item.category,
+        description: item.description,
+        foundAt: item.foundAt,
+        id: item.id,
+        placeFound: item.placeFound,
+        status: item.status,
+        title: item.title,
+      })
+      .from(item)
+      .where(and(...filters))
+      .orderBy(desc(item.createdAt), desc(item.id))
+      .limit(100);
+  }),
 });
