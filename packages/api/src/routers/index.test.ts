@@ -1,4 +1,5 @@
 import { createDb } from "@univault/db";
+import { user } from "@univault/db/schema/auth";
 import { afterAll, describe, expect, it } from "vitest";
 import "@univault/db/test/setup";
 
@@ -49,5 +50,29 @@ describe("admin user listing", () => {
       session: session("system_admin"),
     });
     await expect(caller.admin.listUsers()).resolves.toEqual(expect.any(Array));
+  });
+
+  it("finds users by name or campus email", async () => {
+    const id = crypto.randomUUID();
+    const email = `search-${id}@college.edu`;
+    await db.insert(user).values({
+      email,
+      emailVerified: true,
+      id,
+      name: "Asha Searchable",
+      role: "student",
+    });
+    const caller = appRouter.createCaller({
+      db,
+      session: session("system_admin"),
+    });
+
+    const byName = await caller.admin.listUsers({ search: "Asha Searchable" });
+    const byEmail = await caller.admin.listUsers({ search: email });
+
+    expect(byName).toEqual([
+      expect.objectContaining({ id, name: "Asha Searchable" }),
+    ]);
+    expect(byEmail).toEqual([expect.objectContaining({ email, id })]);
   });
 });
