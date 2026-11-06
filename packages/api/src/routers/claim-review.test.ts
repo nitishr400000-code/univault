@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import { appRouter } from "./index";
 
-const callReviewQueue = (role: string, emailVerified = true) => {
-  const caller = appRouter.createCaller({
+const callerFor = (role: string, emailVerified = true) =>
+  appRouter.createCaller({
     auth: {} as never,
     db: {} as never,
     headers: new Headers(),
@@ -28,10 +28,19 @@ const callReviewQueue = (role: string, emailVerified = true) => {
       },
     } as never,
   });
-  return (
-    caller.claims as unknown as { reviewQueue: () => Promise<unknown> }
-  ).reviewQueue();
-};
+
+const reviewProcedures = (role: string, emailVerified = true) =>
+  callerFor(role, emailVerified).claims as unknown as {
+    approve: (input: { claimId: string }) => Promise<unknown>;
+    reject: (input: { claimId: string }) => Promise<unknown>;
+    reviewQueue: () => Promise<unknown>;
+  };
+
+const callReviewQueue = (role: string, emailVerified = true) =>
+  reviewProcedures(role, emailVerified).reviewQueue();
+
+const reviewClaim = (role: string, action: "approve" | "reject") =>
+  reviewProcedures(role)[action]({ claimId: "00000000-0000-4000-8000-000000000001" });
 
 describe("staff-only claim review", () => {
   it("refuses students and system administrators before reading the queue", async () => {
@@ -47,5 +56,16 @@ describe("staff-only claim review", () => {
     await expect(callReviewQueue("staff", false)).rejects.toMatchObject({
       code: "FORBIDDEN",
     });
+  });
+
+  it("refuses non-staff users from approving or rejecting claims", async () => {
+    const actions = ["approve", "reject"] as const;
+    for (const role of ["student", "system_admin"]) {
+      for (const action of actions) {
+        await expect(reviewClaim(role, action)).rejects.toMatchObject({
+          code: "FORBIDDEN",
+        });
+      }
+    }
   });
 });
