@@ -39,6 +39,30 @@ This project uses PostgreSQL with Drizzle ORM.
 npm run db:push
 ```
 
+## Tests
+
+Tests run across workspace packages through Turborepo and Vitest, using a separate PostgreSQL database. Start the test database with Docker Compose:
+
+```bash
+npm run db:test:start
+```
+
+The test database is available at `postgresql://postgres:password@localhost:5433/univault_test`. Apply the current schema to it before running tests. In PowerShell:
+
+```powershell
+$env:DATABASE_URL = "postgresql://postgres:password@localhost:5433/univault_test"
+npm run db:push
+Remove-Item Env:DATABASE_URL
+```
+
+Then run the workspace tests:
+
+```bash
+npm test
+```
+
+Database tests clear rows and restart identity sequences after each test. Stop the test database with `npm run db:test:stop`.
+
 Then, run the development server:
 
 ```bash

@@ -17,6 +17,8 @@
     "db:generate": "turbo run db:generate -F @univault/db --",
     "db:migrate": "turbo run db:migrate -F @univault/db --",
     "db:start": "docker compose up -d postgres",
+    "db:test:start": "docker compose up -d postgres-test",
+    "db:test:stop": "docker compose stop postgres-test",
     "db:watch": "docker compose up postgres",
     "db:stop": "docker compose stop postgres",
     "db:down": "docker compose down postgres",
@@ -28,7 +30,8 @@
     "postinstall": "varlock codegen --path ./apps/web/ && varlock codegen --path ./apps/server/ && varlock codegen --path ./packages/db/",
     "auth:generate": "cd apps/server && npm run auth:generate",
     "check": "ultracite check",
-    "fix": "ultracite fix"
+    "fix": "ultracite fix",
+    "test": "turbo run test"
   },
   "dependencies": {
     "zod": "^4.5.4"
@@ -42,7 +45,8 @@
     "turbo": "^2.11.7",
     "typescript": "^6.0.3",
     "ultracite": "8.0.0",
-    "varlock": "1.23.0"
+    "varlock": "1.23.0",
+    "vitest": "^5.1.0"
   },
   "overrides": {
     "@next/env": "npm:@varlock/nextjs-integration@1.2.2"
