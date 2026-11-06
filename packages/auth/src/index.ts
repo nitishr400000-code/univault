@@ -59,6 +59,8 @@ export const createAuth = (
       admin({
         ac: authAccessControl,
         adminRoles: ["system_admin"],
+        bannedUserMessage:
+          "Your account has been banned. Contact campus support.",
         defaultRole: "student",
         roles: authRoles,
       }),

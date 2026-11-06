@@ -1,11 +1,10 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { cache } from "react";
 
 import { authClient } from "@/lib/auth-client";
 
-import Dashboard from "./dashboard";
-
-const DashboardPage = async () => {
+export const requireSession = cache(async () => {
   const session = await authClient.getSession({
     fetchOptions: {
       headers: await headers(),
@@ -17,13 +16,5 @@ const DashboardPage = async () => {
     redirect("/login");
   }
 
-  return (
-    <div>
-      <h1>Dashboard</h1>
-      <p>Welcome {session.user.name}</p>
-      <Dashboard />
-    </div>
-  );
-};
-
-export default DashboardPage;
+  return session;
+});
