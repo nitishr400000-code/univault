@@ -5,7 +5,7 @@ import { createDb } from "@univault/db";
 import { user } from "@univault/db/schema/auth";
 import { claim } from "@univault/db/schema/claims";
 import { item } from "@univault/db/schema/items";
-import { eq, inArray } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 
 import { appRouter } from "./index";
@@ -18,20 +18,20 @@ const db = createDb({
 
 const fixture = async (includeStaffClaim = false) => {
   const suffix = randomUUID();
-  const posterId = "review-poster-" + suffix;
-  const staffId = "review-staff-" + suffix;
+  const posterId = `review-poster-${suffix}`;
+  const staffId = `review-staff-${suffix}`;
   const claimantIds = [
-    "review-claimant-a-" + suffix,
-    "review-claimant-b-" + suffix,
+    `review-claimant-a-${suffix}`,
+    `review-claimant-b-${suffix}`,
   ];
   if (includeStaffClaim) {
     claimantIds.push(staffId);
   }
   const itemId = randomUUID();
   const people = [
-    { email: posterId + "@college.edu", id: posterId, name: "Item Poster" },
+    { email: `${posterId}@college.edu`, id: posterId, name: "Item Poster" },
     {
-      email: staffId + "@college.edu",
+      email: `${staffId}@college.edu`,
       id: staffId,
       name: "Staff Reviewer",
       role: "staff",
@@ -39,14 +39,14 @@ const fixture = async (includeStaffClaim = false) => {
     ...claimantIds
       .filter((id) => id !== staffId)
       .map((id) => ({
-        email: id + "@college.edu",
+        email: `${id}@college.edu`,
         id,
         name: "Campus Claimant",
       })),
   ];
-  await db.insert(user).values(
-    people.map((person) => ({ emailVerified: true, ...person }))
-  );
+  await db
+    .insert(user)
+    .values(people.map((person) => ({ emailVerified: true, ...person })));
   await db.insert(item).values({
     category: "Other",
     description: "A red umbrella with a wooden handle",
@@ -63,12 +63,12 @@ const fixture = async (includeStaffClaim = false) => {
       claimantIds.map((claimedBy) => ({
         claimedBy,
         itemId,
-        proofNote: "Proof note from " + claimedBy,
+        proofNote: `Proof note from ${claimedBy}`,
         status: "Pending" as const,
       }))
     )
     .returning({ claimedBy: claim.claimedBy, id: claim.id });
-  return { itemId, insertedClaims, posterId, staffId };
+  return { insertedClaims, itemId, posterId, staffId };
 };
 
 const callerFor = (userId: string, role: "student" | "staff" = "staff") =>
@@ -81,14 +81,14 @@ const callerFor = (userId: string, role: "student" | "staff" = "staff") =>
       session: {
         createdAt: new Date(),
         expiresAt: new Date(Date.now() + 60_000),
-        id: "session-" + userId,
-        token: "token-" + userId,
+        id: `session-${userId}`,
+        token: `token-${userId}`,
         updatedAt: new Date(),
         userId,
       },
       user: {
         createdAt: new Date(),
-        email: userId + "@college.edu",
+        email: `${userId}@college.edu`,
         emailVerified: true,
         id: userId,
         name: "Review User",
@@ -111,10 +111,10 @@ describe("staff claim review", () => {
         seeded.insertedClaims.map((pending) =>
           expect.objectContaining({
             claimId: pending.id,
-            claimantEmail: pending.claimedBy + "@college.edu",
+            claimantEmail: `${pending.claimedBy}@college.edu`,
             itemId: seeded.itemId,
             itemTitle: "Red umbrella",
-            proofNote: "Proof note from " + pending.claimedBy,
+            proofNote: `Proof note from ${pending.claimedBy}`,
           })
         )
       )
@@ -174,7 +174,9 @@ describe("staff claim review", () => {
       .select({ status: claim.status })
       .from(claim)
       .where(inArray(claim.id, [first.id, second.id]));
-    expect(claims.filter(({ status }) => status === "Approved")).toHaveLength(1);
+    expect(claims.filter(({ status }) => status === "Approved")).toHaveLength(
+      1
+    );
   });
 
   it("returns an item to Active only after the last pending claim is rejected", async () => {
