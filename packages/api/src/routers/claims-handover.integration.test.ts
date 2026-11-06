@@ -85,11 +85,13 @@ const fixture = async () => {
 
 interface HandoverCaller {
   claims: {
+    approvedQueue: () => Promise<{ itemId: string }[]>;
     handover: (input: { itemId: string }) => Promise<unknown>;
   };
   items: {
     byId: (input: { id: string }) => Promise<{ status: string }>;
-    search: () => Promise<Array<{ id: string }>>;
+    claimed: () => Promise<{ id: string }[]>;
+    search: () => Promise<{ id: string }[]>;
   };
 }
 
@@ -129,6 +131,9 @@ describe("staff item handover", () => {
     const seeded = await fixture();
     const staff = staffCaller(seeded.reviewerId);
 
+    await expect(staff.claims.approvedQueue()).resolves.toEqual([
+      expect.objectContaining({ itemId: seeded.approvedItemId }),
+    ]);
     await expect(
       staff.claims.handover({ itemId: seeded.withoutApprovalId })
     ).rejects.toMatchObject({ code: "CONFLICT" });
@@ -155,6 +160,14 @@ describe("staff item handover", () => {
         expect.objectContaining({ id: seeded.approvedItemId }),
       ])
     );
+    await expect(staff.claims.approvedQueue()).resolves.not.toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ itemId: seeded.approvedItemId }),
+      ])
+    );
+    await expect(staff.items.claimed()).resolves.toEqual([
+      expect.objectContaining({ id: seeded.approvedItemId }),
+    ]);
 
     const [updated] = await db
       .select({ status: item.status })

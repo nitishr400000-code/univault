@@ -1,12 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
-import {
-  protectedProcedure,
-  publicProcedure,
-  router,
-  systemAdminProcedure,
-} from "../index";
+import { publicProcedure, router, systemAdminProcedure } from "../index";
 import { claimsRouter } from "./claims";
 import { itemsRouter } from "./items";
 
@@ -103,9 +98,5 @@ export const appRouter = router({
   claims: claimsRouter,
   healthCheck: publicProcedure.query(() => "OK"),
   items: itemsRouter,
-  privateData: protectedProcedure.query(({ ctx }) => ({
-    message: "This is private",
-    user: ctx.session.user,
-  })),
 });
 export type AppRouter = typeof appRouter;

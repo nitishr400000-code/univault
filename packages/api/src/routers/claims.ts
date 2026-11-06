@@ -110,6 +110,68 @@ export const claimsRouter = router({
       })
     ),
 
+  approvedQueue: staffProcedure.query(({ ctx }) =>
+    ctx.db
+      .select({
+        claimId: claim.id,
+        claimantEmail: user.email,
+        claimantName: user.name,
+        itemId: itemTable.id,
+        itemTitle: itemTable.title,
+      })
+      .from(claim)
+      .innerJoin(itemTable, eq(claim.itemId, itemTable.id))
+      .innerJoin(user, eq(claim.claimedBy, user.id))
+      .where(and(eq(claim.status, "Approved"), ne(itemTable.status, "Claimed")))
+      .orderBy(desc(claim.createdAt), desc(claim.id))
+  ),
+
+  handover: staffProcedure
+    .input(z.object({ itemId: z.uuid() }))
+    .mutation(({ ctx, input }) =>
+      ctx.db.transaction(async (tx) => {
+        const [lockedItem] = await tx
+          .select({ id: itemTable.id, status: itemTable.status })
+          .from(itemTable)
+          .where(eq(itemTable.id, input.itemId))
+          .for("update");
+        if (!lockedItem) {
+          throw new TRPCError({ code: "NOT_FOUND", message: "Item not found" });
+        }
+        if (lockedItem.status === "Claimed") {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "This item has already been handed over.",
+          });
+        }
+        const [approvedClaim] = await tx
+          .select({ id: claim.id })
+          .from(claim)
+          .where(
+            and(eq(claim.itemId, input.itemId), eq(claim.status, "Approved"))
+          )
+          .limit(1);
+        if (!approvedClaim) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "An approved claim is required before handover.",
+          });
+        }
+        const [updated] = await tx
+          .update(itemTable)
+          .set({ status: "Claimed" })
+          .where(eq(itemTable.id, input.itemId))
+          .returning({ itemId: itemTable.id, status: itemTable.status });
+        if (!updated) {
+          throw new TRPCError({
+            code: "CONFLICT",
+            message: "The item could not be handed over.",
+          });
+        }
+        return updated;
+      })
+    ),
+
   myClaims: campusMemberProcedure.query(({ ctx }) =>
     ctx.db
       .select({

@@ -40,7 +40,9 @@ const callReviewQueue = (role: string, emailVerified = true) =>
   reviewProcedures(role, emailVerified).reviewQueue();
 
 const reviewClaim = (role: string, action: "approve" | "reject") =>
-  reviewProcedures(role)[action]({ claimId: "00000000-0000-4000-8000-000000000001" });
+  reviewProcedures(role)[action]({
+    claimId: "00000000-0000-4000-8000-000000000001",
+  });
 
 describe("staff-only claim review", () => {
   it("refuses students and system administrators before reading the queue", async () => {
@@ -60,12 +62,14 @@ describe("staff-only claim review", () => {
 
   it("refuses non-staff users from approving or rejecting claims", async () => {
     const actions = ["approve", "reject"] as const;
-    for (const role of ["student", "system_admin"]) {
-      for (const action of actions) {
-        await expect(reviewClaim(role, action)).rejects.toMatchObject({
-          code: "FORBIDDEN",
-        });
-      }
-    }
+    await Promise.all(
+      ["student", "system_admin"].flatMap((role) =>
+        actions.map((action) =>
+          expect(reviewClaim(role, action)).rejects.toMatchObject({
+            code: "FORBIDDEN",
+          })
+        )
+      )
+    );
   });
 });

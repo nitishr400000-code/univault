@@ -6,7 +6,12 @@ import { item, itemPhoto } from "@univault/db/schema/items";
 import { and, desc, eq, ilike, inArray, or } from "drizzle-orm";
 import { z } from "zod";
 
-import { protectedProcedure, router, verifiedProcedure } from "../index";
+import {
+  protectedProcedure,
+  router,
+  staffProcedure,
+  verifiedProcedure,
+} from "../index";
 import type { PhotoContentType, StoredPhoto } from "../photo-storage";
 
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
@@ -140,6 +145,20 @@ export const itemsRouter = router({
 
       return { ...foundItem, photos };
     }),
+
+  claimed: staffProcedure.query(({ ctx }) =>
+    ctx.db
+      .select({
+        category: item.category,
+        foundAt: item.foundAt,
+        id: item.id,
+        placeFound: item.placeFound,
+        title: item.title,
+      })
+      .from(item)
+      .where(eq(item.status, "Claimed"))
+      .orderBy(desc(item.createdAt), desc(item.id))
+  ),
 
   create: verifiedProcedure
     .input(createInput)

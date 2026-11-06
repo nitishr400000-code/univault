@@ -4,8 +4,6 @@ import Link from "next/link";
 import ProfileNameForm from "@/components/profile-name-form";
 import { requireSession } from "@/lib/require-session";
 
-import Dashboard from "./dashboard";
-
 const DashboardPage = async () => {
   const session = await requireSession();
 
@@ -33,16 +31,20 @@ const DashboardPage = async () => {
           </>
         )}
         {session.user.emailVerified && session.user.role === "staff" && (
-          <Button render={<Link href="/staff/review" />} variant="outline">
-            Review claims
-          </Button>
+          <>
+            <Button render={<Link href="/staff/review" />} variant="outline">
+              Review claims
+            </Button>
+            <Button render={<Link href="/staff/claimed" />} variant="outline">
+              Claimed items
+            </Button>
+          </>
         )}
       </div>
       <section className="grid gap-4 p-4">
         <h2 className="font-medium">Profile</h2>
         <ProfileNameForm name={session.user.name} />
       </section>
-      <Dashboard />
     </div>
   );
 };

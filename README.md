@@ -26,17 +26,48 @@ First, install the dependencies:
 npm install
 ```
 
-## Database Setup
+## Local end-to-end flow
 
-This project uses PostgreSQL with Drizzle ORM.
+This flow exercises the product from posting a found item through staff handover. It assumes Docker is available and uses the local `college.edu` campus domain.
 
-1. Make sure you have a PostgreSQL database set up.
-2. Update your `apps/server/.env` file with your PostgreSQL connection details.
+1. Install dependencies and configure the server environment:
 
-3. Apply the schema to your database:
+```powershell
+npm install
+Copy-Item apps/server/.env.schema apps/server/.env
+```
 
-```bash
+Edit `apps/server/.env`: set a random `BETTER_AUTH_SECRET` of at least 32 characters, `BETTER_AUTH_URL=http://localhost:3000`, `CORS_ORIGIN=http://localhost:3001`, `CAMPUS_EMAIL_DOMAIN=college.edu`, `DATABASE_URL=postgresql://postgres:password@localhost:5432/univault`, and local `SYSTEM_ADMIN_EMAIL`, `SYSTEM_ADMIN_NAME`, and `SYSTEM_ADMIN_PASSWORD` values. Set `NEXT_PUBLIC_SERVER_URL=http://localhost:3000` in `apps/web/.env` (copy `apps/web/.env.schema` first).
+
+2. Start PostgreSQL and apply the checked-in Drizzle migrations:
+
+```powershell
+npm run db:start
+npm run db:migrate
+```
+
+3. Create the system administrator and start the apps:
+
+```powershell
+npm run seed:admin --workspace=server
+npm run dev
+```
+
+4. Open [http://localhost:3001](http://localhost:3001), sign in as the seeded admin, and open **Manage users** to verify the admin console. Register and verify a `staff@college.edu` account, then return to **Manage users** as the admin and promote that verified account to `staff`.
+
+5. In separate browser profiles, register and verify two more `@college.edu` accounts: one poster and one claimant. Sign in as the poster, post a found item with a photo, then sign in as the claimant and submit a claim with a proof note. The flow uses four accounts total: seeded system admin, staff, poster, and claimant.
+
+6. Sign in as the staff account. Open **Review claims**, approve the claim, and in **Approved claims awaiting handover** choose **Mark as handed over**. The item moves to `Claimed`, disappears from item search, and remains in **Claimed items** for staff.
+
+For a local automated test run, start the separate test database, apply the schema, and run the Turbo/Vitest workspace suite:
+
+```powershell
+npm run db:test:start
+$env:DATABASE_URL = "postgresql://postgres:password@localhost:5433/univault_test"
 npm run db:push
+Remove-Item Env:DATABASE_URL
+npm test
+npm run db:test:stop
 ```
 
 ## Tests

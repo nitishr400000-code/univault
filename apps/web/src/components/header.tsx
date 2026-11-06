@@ -5,10 +5,7 @@ import { ModeToggle } from "./mode-toggle";
 import UserMenu from "./user-menu";
 
 const Header = () => {
-  const links = [
-    { label: "Home", to: "/" },
-    { label: "Dashboard", to: "/dashboard" },
-  ] as const;
+  const links = [{ label: "Dashboard", to: "/dashboard" }] as const;
 
   return (
     <div>
