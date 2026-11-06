@@ -1,6 +1,7 @@
 import { createAuth } from "@univault/auth";
 import { createDb } from "@univault/db";
 import { user } from "@univault/db/schema/auth";
+import { eq } from "drizzle-orm";
 import { afterAll, describe, expect, it } from "vitest";
 import "@univault/db/test/setup";
 
@@ -70,7 +71,10 @@ const createAccount = async (role = "student") => {
   });
   expect(created.status).toBe(200);
   const createdUser = (await created.json()) as { user: { id: string } };
-  await db.update(user).set({ emailVerified: true, role }).where({ email });
+  await db
+    .update(user)
+    .set({ emailVerified: true, role })
+    .where(eq(user.email, email));
   return { email, id: createdUser.user.id, password };
 };
 

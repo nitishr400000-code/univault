@@ -76,3 +76,4 @@ export const createAuth = (
   });
 
 export type Session = ReturnType<typeof createAuth>["$Infer"]["Session"];
+export type Auth = ReturnType<typeof createAuth>;

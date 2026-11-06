@@ -30,7 +30,9 @@ const session = (emailVerified: boolean) =>
 describe("verified-user procedure", () => {
   it("rejects an unverified signed-in user", async () => {
     const caller = verificationProbe.createCaller({
+      auth: {} as never,
       db: {} as never,
+      headers: new Headers(),
       session: session(false),
     });
     await expect(caller.protectedAction()).rejects.toMatchObject({
@@ -41,7 +43,9 @@ describe("verified-user procedure", () => {
 
   it("allows a verified signed-in user", async () => {
     const caller = verificationProbe.createCaller({
+      auth: {} as never,
       db: {} as never,
+      headers: new Headers(),
       session: session(true),
     });
     await expect(caller.protectedAction()).resolves.toBe("allowed");

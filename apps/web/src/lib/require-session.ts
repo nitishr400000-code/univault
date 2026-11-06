@@ -1,10 +1,11 @@
+import type { Session } from "@univault/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { cache } from "react";
 
 import { authClient } from "@/lib/auth-client";
 
-export const requireSession = cache(async () => {
+export const requireSession = cache(async (): Promise<Session> => {
   const session = await authClient.getSession({
     fetchOptions: {
       headers: await headers(),
@@ -16,5 +17,5 @@ export const requireSession = cache(async () => {
     redirect("/login");
   }
 
-  return session;
+  return session as Session;
 });
