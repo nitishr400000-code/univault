@@ -164,4 +164,58 @@ describe("found item creation", () => {
       })
     ).resolves.toEqual({ id: expect.any(String) });
   });
+
+  it("lists the signed-in user's own posts with their current status", async () => {
+    const student = appRouter.createCaller({
+      auth: {} as never,
+      db,
+      headers: new Headers(),
+      photoStorage: photoStorage(),
+      session: session("student-1", "student"),
+    });
+    const staff = appRouter.createCaller({
+      auth: {} as never,
+      db,
+      headers: new Headers(),
+      photoStorage: photoStorage(),
+      session: session("staff-1", "staff"),
+    });
+    const studentItem = await student.items.create({
+      category: "Other",
+      description: "A student post",
+      foundAt: "2026-11-06",
+      photos: [
+        {
+          contentType: "image/png",
+          dataBase64: photoBytes.png.toString("base64"),
+        },
+      ],
+      placeFound: "Library",
+      title: "Student item",
+    });
+    const staffItem = await staff.items.create({
+      category: "Other",
+      description: "A staff post",
+      foundAt: "2026-11-06",
+      photos: [
+        {
+          contentType: "image/png",
+          dataBase64: photoBytes.png.toString("base64"),
+        },
+      ],
+      placeFound: "Library",
+      title: "Staff item",
+    });
+
+    const posts = await student.items.myPosts();
+
+    expect(posts).toContainEqual(
+      expect.objectContaining({
+        id: studentItem.id,
+        status: "Active",
+        title: "Student item",
+      })
+    );
+    expect(posts.map(({ id }) => id)).not.toContain(staffItem.id);
+  });
 });

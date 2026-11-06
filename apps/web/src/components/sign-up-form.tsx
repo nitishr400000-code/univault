@@ -32,8 +32,7 @@ const SignUpForm = ({ onSwitchToSignIn }: { onSwitchToSignIn: () => void }) => {
             toast.error(error.error.message || error.error.statusText);
           },
           onSuccess: () => {
-            router.push("/dashboard");
-            toast.success("Sign up successful");
+            router.push("/verify-email");
           },
         }
       );

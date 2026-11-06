@@ -216,6 +216,21 @@ export const itemsRouter = router({
       }
     }),
 
+  myPosts: protectedProcedure.query(({ ctx }) =>
+    ctx.db
+      .select({
+        category: item.category,
+        foundAt: item.foundAt,
+        id: item.id,
+        placeFound: item.placeFound,
+        status: item.status,
+        title: item.title,
+      })
+      .from(item)
+      .where(eq(item.postedBy, ctx.session.user.id))
+      .orderBy(desc(item.createdAt), desc(item.id))
+  ),
+
   photo: protectedProcedure
     .input(z.object({ photoId: z.uuid() }))
     .query(async ({ ctx, input }) => {

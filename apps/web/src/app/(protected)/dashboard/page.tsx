@@ -28,6 +28,9 @@ const DashboardPage = async () => {
             <Button render={<Link href="/my-claims" />} variant="outline">
               My claims
             </Button>
+            <Button render={<Link href="/my-posts" />} variant="outline">
+              My posts
+            </Button>
           </>
         )}
         {session.user.emailVerified && session.user.role === "staff" && (
