@@ -7,6 +7,7 @@ import {
   router,
   systemAdminProcedure,
 } from "../index";
+import { claimsRouter } from "./claims";
 import { itemsRouter } from "./items";
 
 export const appRouter = router({
@@ -99,6 +100,7 @@ export const appRouter = router({
         });
       }),
   }),
+  claims: claimsRouter,
   healthCheck: publicProcedure.query(() => "OK"),
   items: itemsRouter,
   privateData: protectedProcedure.query(({ ctx }) => ({

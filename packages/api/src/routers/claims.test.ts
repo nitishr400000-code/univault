@@ -35,7 +35,9 @@ interface ClaimsCaller {
 }
 
 const callerFor = (role?: string, emailVerified?: boolean) =>
-  appRouter.createCaller(contextFor(role, emailVerified)) as unknown as ClaimsCaller;
+  appRouter.createCaller(
+    contextFor(role, emailVerified)
+  ) as unknown as ClaimsCaller;
 
 describe("claim submission validation", () => {
   it("requires a non-empty proof note", async () => {

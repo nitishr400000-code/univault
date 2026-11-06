@@ -23,9 +23,14 @@ const DashboardPage = async () => {
           </Button>
         )}
         {(session.user.role === "student" || session.user.role === "staff") && (
-          <Button render={<Link href="/items/new" />} variant="outline">
-            Post found item
-          </Button>
+          <>
+            <Button render={<Link href="/items/new" />} variant="outline">
+              Post found item
+            </Button>
+            <Button render={<Link href="/my-claims" />} variant="outline">
+              My claims
+            </Button>
+          </>
         )}
       </div>
       <section className="grid gap-4 p-4">

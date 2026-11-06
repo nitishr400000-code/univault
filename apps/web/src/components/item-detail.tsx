@@ -16,6 +16,8 @@ import Link from "next/link";
 
 import { useTRPC } from "@/utils/trpc";
 
+import ClaimForm from "./claim-form";
+
 const ItemPhoto = ({
   itemTitle,
   photoId,
@@ -55,7 +57,7 @@ const ItemPhoto = ({
   );
 };
 
-const ItemDetail = ({ id }: { id: string }) => {
+const ItemDetail = ({ canClaim, id }: { canClaim: boolean; id: string }) => {
   const trpc = useTRPC();
   const detail = useQuery(trpc.items.byId.queryOptions({ id }));
 
@@ -138,6 +140,9 @@ const ItemDetail = ({ id }: { id: string }) => {
               />
             ))}
           </div>
+          {canClaim && item.status !== "Claimed" ? (
+            <ClaimForm itemId={item.id} />
+          ) : null}
         </CardContent>
       </Card>
     </article>

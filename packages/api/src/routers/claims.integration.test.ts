@@ -3,8 +3,8 @@ import { randomUUID } from "node:crypto";
 import "@univault/db/test/setup";
 import { createDb } from "@univault/db";
 import { user } from "@univault/db/schema/auth";
-import { item } from "@univault/db/schema/items";
 import { claim } from "@univault/db/schema/claims";
+import { item } from "@univault/db/schema/items";
 import { afterAll, describe, expect, it } from "vitest";
 
 import { appRouter } from "./index";
@@ -15,16 +15,33 @@ const db = createDb({
     "postgresql://postgres:password@localhost:5433/univault_test",
 });
 
-const fixture = async (status: "Active" | "PendingClaim" | "Claimed" = "Active") => {
+const fixture = async (
+  status: "Active" | "PendingClaim" | "Claimed" = "Active"
+) => {
   const suffix = randomUUID();
   const posterId = `poster-${suffix}`;
   const claimantId = `claimant-${suffix}`;
   const otherClaimantId = `other-claimant-${suffix}`;
   const itemId = randomUUID();
   await db.insert(user).values([
-    { email: `${posterId}@college.edu`, emailVerified: true, id: posterId, name: "Item Poster" },
-    { email: `${claimantId}@college.edu`, emailVerified: true, id: claimantId, name: "Item Owner" },
-    { email: `${otherClaimantId}@college.edu`, emailVerified: true, id: otherClaimantId, name: "Another Owner" },
+    {
+      email: `${posterId}@college.edu`,
+      emailVerified: true,
+      id: posterId,
+      name: "Item Poster",
+    },
+    {
+      email: `${claimantId}@college.edu`,
+      emailVerified: true,
+      id: claimantId,
+      name: "Item Owner",
+    },
+    {
+      email: `${otherClaimantId}@college.edu`,
+      emailVerified: true,
+      id: otherClaimantId,
+      name: "Another Owner",
+    },
   ]);
   await db.insert(item).values({
     category: "Other",
@@ -111,7 +128,10 @@ describe("claim submission", () => {
   it("refuses a second pending claim from the same user and item", async () => {
     const seeded = await fixture();
     const claimant = callerFor(seeded.claimantId);
-    const input = { itemId: seeded.itemId, proofNote: "A small dent near the bottom" };
+    const input = {
+      itemId: seeded.itemId,
+      proofNote: "A small dent near the bottom",
+    };
     await claimant.claims.submit(input);
     await expect(claimant.claims.submit(input)).rejects.toMatchObject({
       code: "CONFLICT",
@@ -131,13 +151,20 @@ describe("claim submission", () => {
   it("serializes concurrent pending claims for one user and item", async () => {
     const seeded = await fixture();
     const claimant = callerFor(seeded.claimantId);
-    const input = { itemId: seeded.itemId, proofNote: "A small dent near the bottom" };
+    const input = {
+      itemId: seeded.itemId,
+      proofNote: "A small dent near the bottom",
+    };
     const attempts = await Promise.allSettled([
       claimant.claims.submit(input),
       claimant.claims.submit(input),
     ]);
-    expect(attempts.filter(({ status }) => status === "fulfilled")).toHaveLength(1);
-    expect(attempts.filter(({ status }) => status === "rejected")).toHaveLength(1);
+    expect(
+      attempts.filter(({ status }) => status === "fulfilled")
+    ).toHaveLength(1);
+    expect(attempts.filter(({ status }) => status === "rejected")).toHaveLength(
+      1
+    );
   });
 
   it("lists claims with their statuses without exposing claimant email", async () => {
@@ -156,7 +183,9 @@ describe("claim submission", () => {
         status: "Pending",
       }),
     ]);
-    expect(JSON.stringify(myClaims)).not.toContain(`${seeded.claimantId}@college.edu`);
+    expect(JSON.stringify(myClaims)).not.toContain(
+      `${seeded.claimantId}@college.edu`
+    );
   });
 
   it("shows approved and rejected statuses in My claims", async () => {
@@ -201,8 +230,14 @@ describe("claim submission", () => {
     const myClaims = await callerFor(seeded.claimantId).claims.myClaims();
     expect(myClaims).toEqual(
       expect.arrayContaining([
-        expect.objectContaining({ itemTitle: "Second item", status: "Approved" }),
-        expect.objectContaining({ itemTitle: "Third item", status: "Rejected" }),
+        expect.objectContaining({
+          itemTitle: "Second item",
+          status: "Approved",
+        }),
+        expect.objectContaining({
+          itemTitle: "Third item",
+          status: "Rejected",
+        }),
       ])
     );
   });
